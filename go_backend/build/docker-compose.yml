@@ -1,31 +1,98 @@
-version: '3'
+# version: '3'
+
+# services:
+# elasticsearch:
+#   image: docker.elastic.co/elasticsearch/elasticsearch:7.10.0
+#   container_name: elasticsearch
+#   environment:
+#     - discovery.type=single-node
+#   ports:
+#     - "9200:9200"
+# kibana:
+#   image: docker.elastic.co/kibana/kibana:7.10.0
+#   container_name: kibana
+#   environment:
+#     - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+#   ports:
+#     - "5601:5601"
+#   depends_on:
+#     - elasticsearch
+# mysql:
+#     image: mysql:latest
+#     container_name: mysql
+#     environment:
+#         MYSQL_ROOT_PASSWORD: root_password
+#         MYSQL_DATABASE: go_backend_db
+#     ports:
+#         - '3306:3306'
+# redis:
+#     image: 'redis:latest'
+#     ports:
+#         - '6379:6379'
+
+version: '3.1'
 
 services:
-    # elasticsearch:
-    #   image: docker.elastic.co/elasticsearch/elasticsearch:7.10.0
-    #   container_name: elasticsearch
-    #   environment:
-    #     - discovery.type=single-node
-    #   ports:
-    #     - "9200:9200"
-    # kibana:
-    #   image: docker.elastic.co/kibana/kibana:7.10.0
-    #   container_name: kibana
-    #   environment:
-    #     - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
-    #   ports:
-    #     - "5601:5601"
-    #   depends_on:
-    #     - elasticsearch
-    mysql:
+    mysql-master:
         image: mysql:latest
-        container_name: mysql
+        container_name: mysql-master
+        restart: always
         environment:
             MYSQL_ROOT_PASSWORD: root_password
             MYSQL_DATABASE: go_backend_db
+            # MYSQL_USER: user
+            # MYSQL_PASSWORD: password
         ports:
             - '3306:3306'
-    redis:
-        image: 'redis:latest'
+        networks:
+            - mynetwork
+        # volumes:
+        #     - ./mysql-master-data:/var/lib/mysql
+
+    mysql-slave:
+        image: mysql:latest
+        container_name: mysql-slave
+        restart: always
+        environment:
+            MYSQL_ROOT_PASSWORD: root_password
+            MYSQL_DATABASE: go_backend_db
+            # MYSQL_USER: user
+            # MYSQL_PASSWORD: password
+            MYSQL_MASTER_HOST: mysql-master
+            MYSQL_MASTER_PORT: 3306
+            MYSQL_MASTER_ROOT_PASSWORD: root_password
+        networks:
+            - mynetwork
+        # volumes:
+        #     - ./mysql-slave-data:/var/lib/mysql
+
+    redis-1:
+        image: redis:latest
+        command: ['redis-server', '--port', '7000', '--cluster-enabled', 'yes', '--cluster-node-timeout', '5000', '--appendonly', 'yes']
         ports:
-            - '6379:6379'
+            - '7000:7000'
+        networks:
+            - mynetwork
+
+    redis-2:
+        image: redis:latest
+        command: ['redis-server', '--port', '7001', '--cluster-enabled', 'yes', '--cluster-node-timeout', '5000', '--appendonly', 'yes']
+        ports:
+            - '7001:7001'
+        networks:
+            - mynetwork
+
+    redis-3:
+        image: redis:latest
+        command: ['redis-server', '--port', '7002', '--cluster-enabled', 'yes', '--cluster-node-timeout', '5000', '--appendonly', 'yes']
+        ports:
+            - '7002:7002'
+        networks:
+            - mynetwork
+
+# volumes:
+#     mysql-master-data:
+#     mysql-slave-data:
+
+networks:
+    mynetwork:

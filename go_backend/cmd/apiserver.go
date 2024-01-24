@@ -93,7 +93,7 @@ func RunApiserver(cmd *cobra.Command, _ []string) {
 	// init router
 	r := router.InitRouter(gin.Default(), db, rdClient)
 	server := &http.Server{
-		Addr:    fmt.Sprintf(":%d", viper.GetInt("serve.httpPort")),
+		Addr:    fmt.Sprintf(":%d", viper.GetInt("server.httpPort")),
 		Handler: r,
 	}
 

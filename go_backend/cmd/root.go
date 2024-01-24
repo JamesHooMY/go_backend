@@ -26,9 +26,9 @@ to quickly create a Cobra application.`,
 	// Uncomment the following line if your bare application
 	// has an action associated with it:
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
-		println("go version: ", runtime.Version())
-		println("os: ", runtime.GOOS)
-		println("arch: ", runtime.GOARCH)
+		log.Println("go version: ", runtime.Version())
+		log.Println("os: ", runtime.GOOS)
+		log.Println("arch: ", runtime.GOARCH)
 	},
 }
 

@@ -3,10 +3,10 @@ package user
 import (
 	"net/http"
 
+	hdl "go_backend/api/handler"
 	userSrv "go_backend/api/service/user"
 
 	"github.com/gin-gonic/gin"
-	"github.com/go-playground/validator/v10"
 )
 
 type UserHandler struct {
@@ -22,38 +22,36 @@ func NewUserHandler(userService userSrv.UserService) *UserHandler {
 func (h *UserHandler) Login() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var req struct {
-			Username string `json:"username" validate:"required"`
-			Password string `json:"password" validate:"required"`
+			Username string `json:"username" binding:"required"`
+			Password string `json:"password" binding:"required"`
 		}
 
 		if err := c.ShouldBindJSON(&req); err != nil {
-			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
-				"msg": "invalid request body",
-			})
-			return
-		}
-
-		validator := validator.New()
-		if err := validator.Struct(req); err != nil {
-			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
-				"msg": "body validation failed",
+			c.AbortWithStatusJSON(http.StatusBadRequest, &hdl.Response{
+				Status: http.StatusBadRequest,
+				Msg:    hdl.ParseValidateError(err, &req).Error(),
 			})
 			return
 		}
 
 		token, err := h.UserService.Login(c.Request.Context(), req.Username, req.Password)
 		if err != nil {
-			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
-				"msg": "login failed",
+			c.AbortWithStatusJSON(http.StatusInternalServerError, &hdl.Response{
+				Status: http.StatusInternalServerError,
+				Msg:    "login failed",
 			})
 			return
 		}
 
-		c.AbortWithStatusJSON(http.StatusOK, gin.H{
-			"token": token,
-			"msg":   "login success",
+		c.AbortWithStatusJSON(http.StatusOK, &hdl.Response{
+			Status: http.StatusOK,
+			Data:   &LoginResp{Token: token},
 		})
 	}
+}
+
+type LoginResp struct {
+	Token string `json:"token"`
 }
 
 // @Tags User
@@ -70,8 +68,9 @@ func (h *UserHandler) Info() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		token := c.GetHeader("token")
 		if token == "" {
-			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
-				"msg": "token is required",
+			c.AbortWithStatusJSON(http.StatusBadRequest, &hdl.Response{
+				Status: http.StatusBadRequest,
+				Msg:    "token is empty",
 			})
 			return
 		}

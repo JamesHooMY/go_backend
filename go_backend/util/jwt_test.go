@@ -15,11 +15,9 @@ func Test_GenerateJwtToken(t *testing.T) {
 		id   int
 		name string
 	}
-	type expected struct{}
 	type testCase struct {
-		name     string
-		args     args
-		expected expected
+		name string
+		args args
 	}
 
 	testCases := []testCase{
@@ -34,8 +32,8 @@ func Test_GenerateJwtToken(t *testing.T) {
 
 	for _, tc := range testCases {
 		token, err := util.GenerateJwtToken(tc.args.id, tc.args.name)
-		assert.NoError(t, err)
-		assert.NotEmpty(t, token)
+		assert.NoError(t, err, tc.name)
+		assert.NotEmpty(t, token, tc.name)
 	}
 }
 
@@ -75,11 +73,11 @@ func Test_ParseJwtToken(t *testing.T) {
 
 	for _, tc := range testCases {
 		claims, err := util.ParseJwtToken(tc.args.token)
-		assert.NoError(t, err)
-		assert.NotEmpty(t, claims)
-		assert.Equal(t, tc.expected.claims.Id, claims.Id)
-		assert.Equal(t, tc.expected.claims.Name, claims.Name)
-		assert.Equal(t, tc.expected.claims.ExpiresAt, claims.ExpiresAt)
-		assert.Equal(t, tc.expected.claims.IssuedAt, claims.IssuedAt)
+		assert.NoError(t, err, tc.name)
+		assert.NotEmpty(t, claims, tc.name)
+		assert.Equal(t, tc.expected.claims.Id, claims.Id, tc.name)
+		assert.Equal(t, tc.expected.claims.Name, claims.Name, tc.name)
+		assert.Equal(t, tc.expected.claims.ExpiresAt, claims.ExpiresAt, tc.name)
+		assert.Equal(t, tc.expected.claims.IssuedAt, claims.IssuedAt, tc.name)
 	}
 }

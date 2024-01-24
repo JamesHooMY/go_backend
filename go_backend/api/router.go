@@ -16,7 +16,7 @@ import (
 	"gorm.io/gorm"
 )
 
-func InitRouter(router *gin.Engine, db *gorm.DB, rd *redis.Client) *gin.Engine {
+func InitRouter(router *gin.Engine, db *gorm.DB, rd *redis.ClusterClient) *gin.Engine {
 	// docs.SwaggerInfo.BasePath = fmt.Sprintf("/api/%s", viper.GetString("server.apiVersion"))
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
 

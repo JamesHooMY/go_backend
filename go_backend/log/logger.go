@@ -51,9 +51,10 @@ func getWriteSyncer() zapcore.WriteSyncer {
 		panic(fmt.Errorf("Fatal error get root dir: %s \n", err))
 	}
 
+	// log file store path
 	stLogFilePath := stRootDir + stSeparator + "log" + stSeparator + time.Now().Format(time.DateOnly) + ".log"
-	fmt.Println(stLogFilePath)
 
+	// use lumberjack to split log file
 	lumberjackSyncer := &lumberjack.Logger{
 		Filename:   stLogFilePath,
 		MaxSize:    viper.GetInt("log.maxSize"),

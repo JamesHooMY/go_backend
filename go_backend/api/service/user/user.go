@@ -2,8 +2,6 @@ package user
 
 import (
 	"context"
-
-	"gorm.io/gorm"
 )
 
 type UserService interface {
@@ -11,15 +9,20 @@ type UserService interface {
 	Info(ctx context.Context, token string) (name string, err error)
 }
 
+type UserQuery interface {
+	Login(username, password string) (token string, err error)
+	Info(token string) (name string, err error)
+}
+
 // add database repo here
-func NewUserService(db *gorm.DB) UserService {
+func NewUserService(userQuery UserQuery) UserService {
 	return &userService{
-		db: db,
+		userQuery: userQuery,
 	}
 }
 
 type userService struct {
-	db *gorm.DB
+	userQuery UserQuery
 }
 
 func (s *userService) Login(ctx context.Context, username, password string) (token string, err error) {

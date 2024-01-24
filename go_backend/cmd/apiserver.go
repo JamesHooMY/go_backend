@@ -13,9 +13,10 @@ import (
 	"time"
 
 	router "go_backend/api"
+	"go_backend/database/mysql"
+	"go_backend/database/redis"
 	"go_backend/global"
 	logger "go_backend/log"
-	"go_backend/repo/mysql"
 
 	"github.com/gin-gonic/gin"
 	"github.com/spf13/cobra"
@@ -59,8 +60,22 @@ func RunApiserver(cmd *cobra.Command, _ []string) {
 		panic(errMsg)
 	}
 
+	// init redis
+	rdClient, err := redis.InitRedisClient(cmd.Context())
+	if err != nil {
+		errMsg := fmt.Sprintf("Init Redis error: %s\n", err)
+		global.Logger.Error(errMsg)
+		panic(errMsg)
+	}
+	// test redis
+	// if err := rdClient.Set(cmd.Context(), "test", 1, 30*24*time.Hour).Err(); err != nil {
+	// 	errMsg := fmt.Sprintf("Redis set error: %s\n", err)
+	// 	global.Logger.Error(errMsg)
+	// 	panic(errMsg)
+	// }
+
 	// init router
-	r := router.InitRouter(gin.Default(), db)
+	r := router.InitRouter(gin.Default(), db, rdClient)
 	server := &http.Server{
 		Addr:    fmt.Sprintf(":%d", viper.GetInt("serve.httpPort")),
 		Handler: r,

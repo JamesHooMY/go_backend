@@ -74,6 +74,22 @@ func RunApiserver(cmd *cobra.Command, _ []string) {
 	// 	panic(errMsg)
 	// }
 
+	// test jwt
+	// token, err := util.GenerateJwtToken(1, "james")
+	// if err != nil {
+	// 	errMsg := fmt.Sprintf("Generate token error: %s\n", err)
+	// 	global.Logger.Error(errMsg)
+	// 	panic(errMsg)
+	// }
+	// fmt.Println("token:", token)
+	// claims, err := util.ParseJwtToken(token)
+	// if err != nil {
+	// 	errMsg := fmt.Sprintf("Parse token error: %s\n", err)
+	// 	global.Logger.Error(errMsg)
+	// 	panic(errMsg)
+	// }
+	// fmt.Printf("%+v\n", claims)
+
 	// init router
 	r := router.InitRouter(gin.Default(), db, rdClient)
 	server := &http.Server{

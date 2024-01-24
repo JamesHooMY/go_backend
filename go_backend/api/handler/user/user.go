@@ -56,6 +56,16 @@ func (h *UserHandler) Login() gin.HandlerFunc {
 	}
 }
 
+// @Tags User
+// @Router /user/info [get]
+// @Summary Get user info summary
+// @Description Get user info description
+// @Accept json
+// @Produce json
+// @Param token header string true "token"
+// @Success 200 {object} string "ok"
+// @Failure 400 {object} string "bad request"
+// @Failure 500 {object} string "internal server error"
 func (h *UserHandler) Info() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		token := c.GetHeader("token")

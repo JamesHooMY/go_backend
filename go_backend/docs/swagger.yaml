@@ -1,0 +1,36 @@
+info:
+  contact: {}
+  description: This is a sample server celler server.
+  title: go_backend API
+  version: 0.0.1
+paths:
+  /user/info:
+    get:
+      consumes:
+      - application/json
+      description: Get user info description
+      parameters:
+      - description: token
+        in: header
+        name: token
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ok
+          schema:
+            type: string
+        "400":
+          description: bad request
+          schema:
+            type: string
+        "500":
+          description: internal server error
+          schema:
+            type: string
+      summary: Get user info summary
+      tags:
+      - User
+swagger: "2.0"

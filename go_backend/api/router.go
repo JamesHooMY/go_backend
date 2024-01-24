@@ -9,12 +9,14 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/spf13/viper"
+	swaggerfiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 	"gorm.io/gorm"
 )
 
 func InitRouter(router *gin.Engine, db *gorm.DB) *gin.Engine {
 	// docs.SwaggerInfo.BasePath = fmt.Sprintf("/api/%s", viper.GetString("server.apiVersion"))
-	// router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
+	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
 
 	userHandler := userHdl.NewUserHandler(userSrv.NewUserService(db))
 

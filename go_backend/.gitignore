@@ -1,0 +1,6 @@
+.idea
+.vscode
+
+config/config.yaml
+log/*.log
+vendor

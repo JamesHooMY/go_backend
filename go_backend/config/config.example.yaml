@@ -1,0 +1,23 @@
+server:
+    runMode: debug # debug, release, test
+    httpPort: 8080 # http port
+    shutdownTimeout: 5 # seconds
+    apiVersion: v1 # api version
+
+mysql:
+    username: root
+    password: test
+    host: 127.0.0.1:3306
+    dbName: test_app # database name
+    charset: utf8 # utf8mb4
+    parseTime: True
+    tablePrefix: test_
+    maxIdleConns: 10
+    maxOpenConns: 10
+    maxLifetime: 1 # hour
+
+log:
+    maxSize: 10 # megabytes
+    maxBackups: 10 # files
+    maxAge: 90 # days
+    compress: false

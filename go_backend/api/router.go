@@ -17,6 +17,11 @@ import (
 )
 
 func InitRouter(router *gin.Engine, db *gorm.DB, rd *redis.ClusterClient) *gin.Engine {
+	// middleware
+	// * if need cors then uncomment this line
+	// router.Use(middleware.Cors())
+
+	// swagger
 	// docs.SwaggerInfo.BasePath = fmt.Sprintf("/api/%s", viper.GetString("server.apiVersion"))
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
 

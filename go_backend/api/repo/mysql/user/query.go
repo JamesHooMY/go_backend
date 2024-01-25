@@ -1,25 +1,34 @@
 package user
 
 import (
+	"errors"
+
 	"go_backend/api/service/user"
+	"go_backend/model"
 
 	"gorm.io/gorm"
 )
 
-type UserQuery struct {
+var ErrUserNotFound = errors.New("user not found")
+
+type userQueryRepo struct {
 	db *gorm.DB
 }
 
-func NewUserQuery(db *gorm.DB) user.UserQuery {
-	return &UserQuery{
+func NewUserQueryRepo(db *gorm.DB) user.IUserQueryRepo {
+	return &userQueryRepo{
 		db: db,
 	}
 }
 
-func (q *UserQuery) Login(username, password string) (token string, err error) {
-	return "", nil
-}
+func (q *userQueryRepo) GetUserByEmail(email string) (user *model.User, err error) {
+	err = q.db.Model(&model.User{}).Where("email = ?", email).First(&user).Error
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return nil, ErrUserNotFound
+		}
+		return nil, err
+	}
 
-func (q *UserQuery) Info(token string) (name string, err error) {
-	return "UserInfo", nil
+	return user, nil
 }

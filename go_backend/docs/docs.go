@@ -15,9 +15,9 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/user/info": {
-            "get": {
-                "description": "Get user info description",
+        "/user/login": {
+            "post": {
+                "description": "User login",
                 "consumes": [
                     "application/json"
                 ],
@@ -27,21 +27,23 @@ const docTemplate = `{
                 "tags": [
                     "User"
                 ],
-                "summary": "Get user info summary",
+                "summary": "User login",
                 "parameters": [
                     {
-                        "type": "string",
-                        "description": "token",
-                        "name": "token",
-                        "in": "header",
-                        "required": true
+                        "description": "username",
+                        "name": "username",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "ok",
+                        "description": "success",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/user.LoginResp"
                         }
                     },
                     "400": {
@@ -56,6 +58,16 @@ const docTemplate = `{
                             "type": "string"
                         }
                     }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "user.LoginResp": {
+            "type": "object",
+            "properties": {
+                "token": {
+                    "type": "string"
                 }
             }
         }

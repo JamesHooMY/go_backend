@@ -1,27 +1,34 @@
+definitions:
+  user.LoginResp:
+    properties:
+      token:
+        type: string
+    type: object
 info:
   contact: {}
   description: This is a sample server celler server.
   title: go_backend API
   version: 0.0.1
 paths:
-  /user/info:
-    get:
+  /user/login:
+    post:
       consumes:
       - application/json
-      description: Get user info description
+      description: User login
       parameters:
-      - description: token
-        in: header
-        name: token
+      - description: username
+        in: body
+        name: username
         required: true
-        type: string
+        schema:
+          type: string
       produces:
       - application/json
       responses:
         "200":
-          description: ok
+          description: success
           schema:
-            type: string
+            $ref: '#/definitions/user.LoginResp'
         "400":
           description: bad request
           schema:
@@ -30,7 +37,7 @@ paths:
           description: internal server error
           schema:
             type: string
-      summary: Get user info summary
+      summary: User login
       tags:
       - User
 swagger: "2.0"

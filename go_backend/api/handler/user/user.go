@@ -1,91 +1,77 @@
 package user
 
 import (
+	"errors"
 	"net/http"
 
 	hdl "go_backend/api/handler"
+	userQryRepo "go_backend/api/repo/mysql/user"
 	userSrv "go_backend/api/service/user"
+	"go_backend/util"
 
 	"github.com/gin-gonic/gin"
 )
 
-type UserHandler struct {
-	UserService userSrv.UserService
+type IUserHandler interface {
+	Login() gin.HandlerFunc
 }
 
-func NewUserHandler(userService userSrv.UserService) *UserHandler {
+type UserHandler struct {
+	UserService userSrv.IUserService
+}
+
+func NewUserHandler(userService userSrv.IUserService) IUserHandler {
 	return &UserHandler{
 		UserService: userService,
 	}
 }
 
+// @Tags User
+// @Router /user/login [post]
+// @Summary User login
+// @Description User login
+// @Accept json
+// @Produce json
+// @Param username body string true "username"
+// @Success 200 {object} LoginResp "success"
+// @Failure 400 {object} string "bad request"
+// @Failure 500 {object} string "internal server error"
 func (h *UserHandler) Login() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var req struct {
-			Username string `json:"username" binding:"required"`
-			Password string `json:"password" binding:"required"`
+			Email    string `json:"email" binding:"required,email"`
+			Password string `json:"password" binding:"required,min=8,max=20,alphanum"`
 		}
 
 		if err := c.ShouldBindJSON(&req); err != nil {
 			c.AbortWithStatusJSON(http.StatusBadRequest, &hdl.Response{
-				Status: http.StatusBadRequest,
-				Msg:    hdl.ParseValidateError(err, &req).Error(),
+				Code: hdl.ErrRequestInvalid,
+				Msg:  util.ParseValidateError(err).Error(),
 			})
 			return
 		}
 
-		token, err := h.UserService.Login(c.Request.Context(), req.Username, req.Password)
+		loginResp, err := h.UserService.Login(c.Request.Context(), req.Email, req.Password)
 		if err != nil {
+			if errors.Is(err, userQryRepo.ErrUserNotFound) {
+				c.AbortWithStatusJSON(http.StatusBadRequest, &hdl.Response{
+					Code: hdl.ErrNotFound,
+					Msg:  userQryRepo.ErrUserNotFound.Error(),
+				})
+				return
+			}
 			c.AbortWithStatusJSON(http.StatusInternalServerError, &hdl.Response{
-				Status: http.StatusInternalServerError,
-				Msg:    "login failed",
+				Code: hdl.ErrInternalServer,
+				Msg:  hdl.ErrInternalServerMsg,
 			})
 			return
 		}
 
 		c.AbortWithStatusJSON(http.StatusOK, &hdl.Response{
-			Status: http.StatusOK,
-			Data:   &LoginResp{Token: token},
-		})
-	}
-}
-
-type LoginResp struct {
-	Token string `json:"token"`
-}
-
-// @Tags User
-// @Router /user/info [get]
-// @Summary Get user info summary
-// @Description Get user info description
-// @Accept json
-// @Produce json
-// @Param token header string true "token"
-// @Success 200 {object} string "ok"
-// @Failure 400 {object} string "bad request"
-// @Failure 500 {object} string "internal server error"
-func (h *UserHandler) Info() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		token := c.GetHeader("token")
-		if token == "" {
-			c.AbortWithStatusJSON(http.StatusBadRequest, &hdl.Response{
-				Status: http.StatusBadRequest,
-				Msg:    "token is empty",
-			})
-			return
-		}
-
-		name, err := h.UserService.Info(c.Request.Context(), token)
-		if err != nil {
-			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
-				"msg": "get info failed",
-			})
-			return
-		}
-
-		c.AbortWithStatusJSON(http.StatusOK, gin.H{
-			"info": name,
-			"msg":  "get info success",
+			Data: gin.H{
+				"username": loginResp.Username,
+				"token":    loginResp.Token,
+			},
 		})
 	}
 }

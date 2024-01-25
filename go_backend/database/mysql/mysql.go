@@ -14,21 +14,26 @@ import (
 )
 
 func InitMySQL() (*gorm.DB, error) {
-	dsn := fmt.Sprintf("%s:%s@tcp(%s)/%s?charset=%s&parseTime=%s&loc=%s",
+	dsn := fmt.Sprintf("%s:%s@tcp(%s)/%s?charset=utf8mb4&parseTime=True&loc=Local",
 		viper.GetString("mysql.username"),
 		viper.GetString("mysql.password"),
 		viper.GetString("mysql.host"),
-		viper.GetString("mysql.dbName"),
-		viper.GetString("mysql.charset"),
-		viper.GetString("mysql.parseTime"),
-		viper.GetString("mysql.loc"))
+		viper.GetString("mysql.dbName"))
+
+	location, err := time.LoadLocation("UTC")
+	if err != nil {
+		return nil, err
+	}
 
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{
 		NamingStrategy: schema.NamingStrategy{
-			SingularTable: viper.GetBool("mysql.singularTable"),
+			SingularTable: true,
 			TablePrefix:   viper.GetString("mysql.tablePrefix"),
 		},
 		Logger: logger.Default.LogMode(logger.Info),
+		NowFunc: func() time.Time {
+			return time.Now().In(location)
+		},
 	})
 	if err != nil {
 		return nil, err

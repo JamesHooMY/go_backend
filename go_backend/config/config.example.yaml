@@ -9,10 +9,7 @@ mysql:
     password: root_password
     host: localhost:3306
     dbName: go_backend_db
-    charset: utf8mb4
-    parseTime: True
     tablePrefix: go_backend_
-    singularTable: True
     maxIdleConns: 10
     maxOpenConns: 10
     maxLifetime: 1 # hour

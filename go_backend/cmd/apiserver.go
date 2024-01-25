@@ -12,7 +12,7 @@ import (
 	"syscall"
 	"time"
 
-	router "go_backend/api"
+	router "go_backend/api/rest"
 	"go_backend/database/mysql"
 	"go_backend/database/redis"
 	"go_backend/global"

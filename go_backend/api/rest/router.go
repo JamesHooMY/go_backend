@@ -1,11 +1,11 @@
-package api
+package rest
 
 import (
 	"fmt"
 
-	userHdl "go_backend/api/handler/user"
-	userQryRepo "go_backend/api/repo/mysql/user"
-	userSrv "go_backend/api/service/user"
+	userHdl "go_backend/api/rest/handler/user"
+	userRepo "go_backend/api/rest/repo/mysql/user"
+	userSrv "go_backend/api/rest/service/user"
 	_ "go_backend/docs"
 
 	"github.com/gin-gonic/gin"
@@ -25,11 +25,13 @@ func InitRouter(router *gin.Engine, db *gorm.DB, rd *redis.ClusterClient) *gin.E
 	// docs.SwaggerInfo.BasePath = fmt.Sprintf("/api/%s", viper.GetString("server.apiVersion"))
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
 
-	userHandler := userHdl.NewUserHandler(userSrv.NewUserService(userQryRepo.NewUserQueryRepo(db)))
+	userHandler := userHdl.NewUserHandler(userSrv.NewUserService(userRepo.NewUserQueryRepo(db), userRepo.NewUserCommandRepo(db)))
 
 	v1 := router.Group(fmt.Sprintf("/api/%s", viper.GetString("server.apiVersion")))
 	user := v1.Group("/user")
+	user.GET("/:id", userHandler.GetUserByID())
 	user.POST("/login", userHandler.Login())
+	user.POST("/register", userHandler.Register())
 
 	return router
 }

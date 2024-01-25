@@ -9,18 +9,19 @@ import (
 )
 
 type Claims struct {
-	Id   int    `json:"id"`
-	Name string `json:"name"`
+	ID    uint   `json:"id"`
+	Name  string `json:"name"`
+	Email string `json:"email"`
 	jwt.RegisteredClaims
 }
 
-func GenerateJwtToken(id int, name string) (token string, err error) {
+func GenerateJwtToken(ID uint, name string) (token string, err error) {
 	timeNow := time.Now()
 	claims := Claims{
-		Id:   id,
+		ID:   ID,
 		Name: name,
 		RegisteredClaims: jwt.RegisteredClaims{
-			ExpiresAt: jwt.NewNumericDate(timeNow.Add(viper.GetDuration("jwt.tokenExpire") * time.Minute)),
+			ExpiresAt: jwt.NewNumericDate(timeNow.Add(30 * time.Minute)),
 			IssuedAt:  jwt.NewNumericDate(timeNow),
 		},
 	}

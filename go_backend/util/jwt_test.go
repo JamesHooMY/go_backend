@@ -12,7 +12,7 @@ import (
 
 func Test_GenerateJwtToken(t *testing.T) {
 	type args struct {
-		id   int
+		id   uint
 		name string
 	}
 	type testCase struct {
@@ -39,6 +39,53 @@ func Test_GenerateJwtToken(t *testing.T) {
 
 func Test_ParseJwtToken(t *testing.T) {
 	type args struct {
+		id   uint
+		name string
+	}
+	type expected struct {
+		claims util.Claims
+		err    error
+	}
+	type testCase struct {
+		name     string
+		args     args
+		expected expected
+	}
+
+	testCases := []testCase{
+		{
+			name: "test1",
+			args: args{
+				id:   1,
+				name: "james",
+			},
+			expected: expected{
+				claims: util.Claims{
+					ID:   1,
+					Name: "james",
+					RegisteredClaims: jwt.RegisteredClaims{
+						ExpiresAt: jwt.NewNumericDate(time.Unix(int64(1706087945), 0)),
+						IssuedAt:  jwt.NewNumericDate(time.Unix(int64(1706086145), 0)),
+					},
+				},
+				err: nil,
+			},
+		},
+	}
+
+	for _, tc := range testCases {
+		token, _ := util.GenerateJwtToken(tc.args.id, tc.args.name)
+		claims, err := util.ParseJwtToken(token)
+		assert.NoError(t, err, tc.name+"_ParseJwtToken")
+		assert.NotEmpty(t, claims, tc.name+"_ParseJwtToken")
+		assert.Equal(t, tc.expected.claims.ID, claims.ID, tc.name+"_ParseJwtToken")
+		assert.Equal(t, tc.expected.claims.Name, claims.Name, tc.name+"_ParseJwtToken")
+
+	}
+}
+
+func Test_ParseJwtToken_Expired(t *testing.T) {
+	type args struct {
 		token string
 	}
 	type expected struct {
@@ -59,7 +106,7 @@ func Test_ParseJwtToken(t *testing.T) {
 			},
 			expected: expected{
 				claims: util.Claims{
-					Id:   1,
+					ID:   1,
 					Name: "james",
 					RegisteredClaims: jwt.RegisteredClaims{
 						ExpiresAt: jwt.NewNumericDate(time.Unix(int64(1706087945), 0)),
@@ -73,11 +120,7 @@ func Test_ParseJwtToken(t *testing.T) {
 
 	for _, tc := range testCases {
 		claims, err := util.ParseJwtToken(tc.args.token)
-		assert.NoError(t, err, tc.name)
-		assert.NotEmpty(t, claims, tc.name)
-		assert.Equal(t, tc.expected.claims.Id, claims.Id, tc.name)
-		assert.Equal(t, tc.expected.claims.Name, claims.Name, tc.name)
-		assert.Equal(t, tc.expected.claims.ExpiresAt, claims.ExpiresAt, tc.name)
-		assert.Equal(t, tc.expected.claims.IssuedAt, claims.IssuedAt, tc.name)
+		assert.ErrorIs(t, err, jwt.ErrTokenExpired, tc.name)
+		assert.Empty(t, claims, tc.name)
 	}
 }

@@ -1,20 +1,30 @@
 server:
     runMode: debug # debug, release, test
-    httpPort: 8080 # http port
-    shutdownTimeout: 5 # seconds
-    apiVersion: v1 # api version
+    httpPort: 8080
+    shutdownTimeout: 1 # second
+    apiVersion: v1
 
 mysql:
     username: root
-    password: test
-    host: 127.0.0.1:3306
-    dbName: test_app # database name
-    charset: utf8 # utf8mb4
+    password: root_password
+    host: localhost:3306
+    dbName: go_backend_db
+    charset: utf8mb4
     parseTime: True
-    tablePrefix: test_
+    tablePrefix: go_backend_
+    singularTable: True
     maxIdleConns: 10
     maxOpenConns: 10
     maxLifetime: 1 # hour
+
+redis:
+    node1: 'localhost:7000'
+    node2: 'localhost:7001'
+    node3: 'localhost:7002'
+    password: ''
+
+jwt:
+    secretKey: secret_key
 
 log:
     maxSize: 10 # megabytes

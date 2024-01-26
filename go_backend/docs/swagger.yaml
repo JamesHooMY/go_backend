@@ -8,9 +8,9 @@ definitions:
     type: object
   user.LoginResp:
     properties:
+      id:
+        type: integer
       token:
-        type: string
-      username:
         type: string
     type: object
   user.UserListResp:
@@ -83,6 +83,26 @@ definitions:
     - email
     - password
     type: object
+  user.updateUserReq:
+    properties:
+      age:
+        maximum: 150
+        minimum: 1
+        type: integer
+      email:
+        maxLength: 50
+        type: string
+      mobile:
+        maxLength: 11
+        type: string
+      name:
+        maxLength: 20
+        type: string
+      password:
+        maxLength: 20
+        minLength: 8
+        type: string
+    type: object
 info:
   contact: {}
   description: This is a sample server celler server.
@@ -90,6 +110,36 @@ info:
   version: 0.0.1
 paths:
   /api/v1/user/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete user by id
+      parameters:
+      - description: id
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: bad request
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+        "404":
+          description: not found
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+        "500":
+          description: internal server error
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+      summary: Delete user by id
+      tags:
+      - User
     get:
       consumes:
       - application/json
@@ -111,11 +161,51 @@ paths:
           description: bad request
           schema:
             $ref: '#/definitions/handler.ErrorResponse'
+        "404":
+          description: not found
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
         "500":
           description: internal server error
           schema:
             $ref: '#/definitions/handler.ErrorResponse'
       summary: Get user by id
+      tags:
+      - User
+    put:
+      consumes:
+      - application/json
+      description: Update user by id
+      parameters:
+      - description: id
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: update user request
+        in: body
+        name: updateUserReq
+        required: true
+        schema:
+          $ref: '#/definitions/user.updateUserReq'
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: bad request
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+        "404":
+          description: not found
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+        "500":
+          description: internal server error
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+      summary: Update user by id
       tags:
       - User
   /api/v1/user/login:
@@ -139,6 +229,10 @@ paths:
             $ref: '#/definitions/user.LoginResp'
         "400":
           description: bad request
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+        "404":
+          description: not found
           schema:
             $ref: '#/definitions/handler.ErrorResponse'
         "500":

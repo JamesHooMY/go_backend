@@ -34,6 +34,8 @@ func InitRouter(router *gin.Engine, db *gorm.DB, rd *redis.ClusterClient) *gin.E
 	user.POST("/login", userHandler.Login())
 	user.POST("/register", userHandler.Register())
 	user.POST("/userList", userHandler.GetUserList())
+	user.PUT("/:id", userHandler.UpdateUserByID())
+	user.DELETE("/:id", userHandler.DeleteUserByID())
 
 	return router
 }

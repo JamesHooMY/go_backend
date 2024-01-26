@@ -52,6 +52,12 @@ const docTemplate = `{
                             "$ref": "#/definitions/handler.ErrorResponse"
                         }
                     },
+                    "404": {
+                        "description": "not found",
+                        "schema": {
+                            "$ref": "#/definitions/handler.ErrorResponse"
+                        }
+                    },
                     "500": {
                         "description": "internal server error",
                         "schema": {
@@ -191,6 +197,111 @@ const docTemplate = `{
                             "$ref": "#/definitions/handler.ErrorResponse"
                         }
                     },
+                    "404": {
+                        "description": "not found",
+                        "schema": {
+                            "$ref": "#/definitions/handler.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/handler.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "Update user by id",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "User"
+                ],
+                "summary": "Update user by id",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "update user request",
+                        "name": "updateUserReq",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/user.updateUserReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "400": {
+                        "description": "bad request",
+                        "schema": {
+                            "$ref": "#/definitions/handler.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "not found",
+                        "schema": {
+                            "$ref": "#/definitions/handler.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/handler.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Delete user by id",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "User"
+                ],
+                "summary": "Delete user by id",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "400": {
+                        "description": "bad request",
+                        "schema": {
+                            "$ref": "#/definitions/handler.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "not found",
+                        "schema": {
+                            "$ref": "#/definitions/handler.ErrorResponse"
+                        }
+                    },
                     "500": {
                         "description": "internal server error",
                         "schema": {
@@ -216,10 +327,10 @@ const docTemplate = `{
         "user.LoginResp": {
             "type": "object",
             "properties": {
-                "token": {
-                    "type": "string"
+                "id": {
+                    "type": "integer"
                 },
-                "username": {
+                "token": {
                     "type": "string"
                 }
             }
@@ -318,6 +429,33 @@ const docTemplate = `{
                 "email": {
                     "type": "string",
                     "maxLength": 50
+                },
+                "password": {
+                    "type": "string",
+                    "maxLength": 20,
+                    "minLength": 8
+                }
+            }
+        },
+        "user.updateUserReq": {
+            "type": "object",
+            "properties": {
+                "age": {
+                    "type": "integer",
+                    "maximum": 150,
+                    "minimum": 1
+                },
+                "email": {
+                    "type": "string",
+                    "maxLength": 50
+                },
+                "mobile": {
+                    "type": "string",
+                    "maxLength": 11
+                },
+                "name": {
+                    "type": "string",
+                    "maxLength": 20
                 },
                 "password": {
                     "type": "string",

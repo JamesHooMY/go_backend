@@ -8,9 +8,11 @@ import (
 	hdl "go_backend/api/rest/handler"
 	userRepo "go_backend/api/rest/repo/mysql/user"
 	userSrv "go_backend/api/rest/service/user"
+	"go_backend/model"
 	"go_backend/util"
 
 	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
 )
 
 type IUserHandler interface {
@@ -18,6 +20,8 @@ type IUserHandler interface {
 	Register() gin.HandlerFunc
 	GetUserByID() gin.HandlerFunc
 	GetUserList() gin.HandlerFunc
+	UpdateUserByID() gin.HandlerFunc
+	DeleteUserByID() gin.HandlerFunc
 }
 
 type UserHandler struct {
@@ -39,6 +43,7 @@ func NewUserHandler(userService userSrv.IUserService) IUserHandler {
 // @Param loginReq body loginReq true "login request"
 // @Success 200 {object} LoginResp "success"
 // @Failure 400 {object} hdl.ErrorResponse "bad request"
+// @Failure 404 {object} hdl.ErrorResponse "not found"
 // @Failure 500 {object} hdl.ErrorResponse "internal server error"
 func (h *UserHandler) Login() gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -54,7 +59,7 @@ func (h *UserHandler) Login() gin.HandlerFunc {
 		loginResp, err := h.UserService.Login(c.Request.Context(), req.Email, req.Password)
 		if err != nil {
 			if errors.Is(err, userRepo.ErrUserNotFound) {
-				c.AbortWithStatusJSON(http.StatusBadRequest, &hdl.ErrorResponse{
+				c.AbortWithStatusJSON(http.StatusNotFound, &hdl.ErrorResponse{
 					Code: hdl.ErrNotFound,
 					Msg:  userRepo.ErrUserNotFound.Error(),
 				})
@@ -109,6 +114,7 @@ func (h *UserHandler) Register() gin.HandlerFunc {
 				})
 				return
 			}
+
 			c.AbortWithStatusJSON(http.StatusInternalServerError, &hdl.ErrorResponse{
 				Code: hdl.ErrInternalServer,
 				Msg:  hdl.ErrInternalServerMsg,
@@ -134,19 +140,11 @@ type registerReq struct {
 // @Param id path int true "id"
 // @Success 200 {object} UserResp "success"
 // @Failure 400 {object} hdl.ErrorResponse "bad request"
+// @Failure 404 {object} hdl.ErrorResponse "not found"
 // @Failure 500 {object} hdl.ErrorResponse "internal server error"
 func (h *UserHandler) GetUserByID() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		id := c.Param("id")
-		if id == "" {
-			c.AbortWithStatusJSON(http.StatusBadRequest, &hdl.ErrorResponse{
-				Code: hdl.ErrRequestInvalid,
-				Msg:  "id is required",
-			})
-			return
-		}
-
-		userID, err := strconv.ParseUint(id, 10, 0)
+		userID, err := strconv.ParseUint(c.Param("id"), 10, 0)
 		if err != nil {
 			c.AbortWithStatusJSON(http.StatusBadRequest, &hdl.ErrorResponse{
 				Code: hdl.ErrRequestInvalid,
@@ -158,7 +156,7 @@ func (h *UserHandler) GetUserByID() gin.HandlerFunc {
 		user, err := h.UserService.GetUserByID(c.Request.Context(), uint(userID))
 		if err != nil {
 			if errors.Is(err, userRepo.ErrUserNotFound) {
-				c.AbortWithStatusJSON(http.StatusBadRequest, &hdl.ErrorResponse{
+				c.AbortWithStatusJSON(http.StatusNotFound, &hdl.ErrorResponse{
 					Code: hdl.ErrNotFound,
 					Msg:  userRepo.ErrUserNotFound.Error(),
 				})
@@ -216,4 +214,114 @@ func (h *UserHandler) GetUserList() gin.HandlerFunc {
 type getUserListReq struct {
 	Page  int `form:"page" binding:"required,min=1"`
 	Limit int `form:"limit" binding:"required,min=1"`
+}
+
+// @Tags User
+// @Router /api/v1/user/{id} [put]
+// @Summary Update user by id
+// @Description Update user by id
+// @Accept json
+// @Produce json
+// @Param id path int true "id"
+// @Param updateUserReq body updateUserReq true "update user request"
+// @Success 204
+// @Failure 400 {object} hdl.ErrorResponse "bad request"
+// @Failure 404 {object} hdl.ErrorResponse "not found"
+// @Failure 500 {object} hdl.ErrorResponse "internal server error"
+func (h *UserHandler) UpdateUserByID() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		userID, err := strconv.ParseUint(c.Param("id"), 10, 0)
+		if err != nil {
+			c.AbortWithStatusJSON(http.StatusBadRequest, &hdl.ErrorResponse{
+				Code: hdl.ErrRequestInvalid,
+				Msg:  "id must be an integer",
+			})
+			return
+		}
+
+		var req *updateUserReq
+		if err = c.ShouldBindJSON(&req); err != nil {
+			c.AbortWithStatusJSON(http.StatusBadRequest, &hdl.ErrorResponse{
+				Code: hdl.ErrRequestInvalid,
+				Msg:  util.ParseValidateError(err).Error(),
+			})
+			return
+		}
+
+		err = h.UserService.UpdateUser(c.Request.Context(), &model.User{
+			Model: gorm.Model{
+				ID: uint(userID),
+			},
+			Mobile:   req.Mobile,
+			Name:     req.Name,
+			Age:      req.Age,
+			Password: req.Password,
+		})
+		if err != nil {
+			if errors.Is(err, userRepo.ErrUserNotFound) {
+				c.AbortWithStatusJSON(http.StatusNotFound, &hdl.ErrorResponse{
+					Code: hdl.ErrNotFound,
+					Msg:  userRepo.ErrUserNotFound.Error(),
+				})
+				return
+			}
+			c.AbortWithStatusJSON(http.StatusInternalServerError, &hdl.ErrorResponse{
+				Code: hdl.ErrInternalServer,
+				Msg:  hdl.ErrInternalServerMsg,
+			})
+			return
+		}
+
+		c.AbortWithStatus(http.StatusNoContent)
+	}
+}
+
+type updateUserReq struct {
+	Email    string `form:"email,omitempty" binding:"omitempty,email,max=50"`
+	Mobile   string `form:"mobile,omitempty" binding:"omitempty,max=11"`
+	Name     string `form:"name,omitempty" binding:"omitempty,max=20"`
+	Age      int    `form:"age,omitempty" binding:"omitempty,min=1,max=150"`
+	Password string `form:"password,omitempty" binding:"omitempty,min=8,max=20,alphanum"`
+}
+
+// @Tags User
+// @Router /api/v1/user/{id} [delete]
+// @Summary Delete user by id
+// @Description Delete user by id
+// @Accept json
+// @Produce json
+// @Param id path int true "id"
+// @Success 204
+// @Failure 400 {object} hdl.ErrorResponse "bad request"
+// @Failure 404 {object} hdl.ErrorResponse "not found"
+// @Failure 500 {object} hdl.ErrorResponse "internal server error"
+func (h *UserHandler) DeleteUserByID() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		userID, err := strconv.ParseUint(c.Param("id"), 10, 0)
+		if err != nil {
+			c.AbortWithStatusJSON(http.StatusBadRequest, &hdl.ErrorResponse{
+				Code: hdl.ErrRequestInvalid,
+				Msg:  "id must be an integer",
+			})
+			return
+		}
+
+		err = h.UserService.DeleteUserByID(c.Request.Context(), uint(userID))
+		if err != nil {
+			if errors.Is(err, userRepo.ErrUserNotFound) {
+				c.AbortWithStatusJSON(http.StatusNotFound, &hdl.ErrorResponse{
+					Code: hdl.ErrNotFound,
+					Msg:  userRepo.ErrUserNotFound.Error(),
+				})
+				return
+			}
+			c.AbortWithStatusJSON(http.StatusInternalServerError, &hdl.ErrorResponse{
+				Code: hdl.ErrInternalServer,
+				Msg:  hdl.ErrInternalServerMsg,
+			})
+			return
+		}
+
+		c.AbortWithStatus(http.StatusNoContent)
+	}
 }

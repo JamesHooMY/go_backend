@@ -10,10 +10,12 @@ import (
 )
 
 type IUserService interface {
-	Login(ctx context.Context, username, password string) (loginResp *LoginResp, err error)
+	Login(ctx context.Context, name, password string) (loginResp *LoginResp, err error)
 	Register(ctx context.Context, email, password string) (err error)
 	GetUserByID(ctx context.Context, id uint) (userResp *UserResp, err error)
 	GetUserList(ctx context.Context, page, limit int) (userListResp *UserListResp, err error)
+	UpdateUser(ctx context.Context, user *model.User) (err error)
+	DeleteUserByID(ctx context.Context, id uint) (err error)
 }
 
 type IUserQueryRepo interface {
@@ -24,6 +26,8 @@ type IUserQueryRepo interface {
 
 type IUserCommandRepo interface {
 	CreateUser(ctx context.Context, user *model.User) (err error)
+	UpdateUser(ctx context.Context, user *model.User) (err error)
+	DeleteUser(ctx context.Context, id uint) (err error)
 }
 
 type userService struct {
@@ -51,14 +55,14 @@ func (s *userService) Login(ctx context.Context, email, password string) (loginR
 	}
 
 	return &LoginResp{
-		Username: user.Name,
-		Token:    token,
+		ID:    user.ID,
+		Token: token,
 	}, nil
 }
 
 type LoginResp struct {
-	Username string `json:"username"`
-	Token    string `json:"token"`
+	ID    uint   `json:"id"`
+	Token string `json:"token"`
 }
 
 func (s *userService) Register(ctx context.Context, email, password string) (err error) {
@@ -139,4 +143,22 @@ type UserListResp struct {
 	Total    int64       `json:"total"`
 	Page     int         `json:"page"`
 	Limit    int         `json:"limit"`
+}
+
+func (s *userService) UpdateUser(ctx context.Context, user *model.User) (err error) {
+	err = s.userCmdRepo.UpdateUser(ctx, user)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (s *userService) DeleteUserByID(ctx context.Context, id uint) (err error) {
+	err = s.userCmdRepo.DeleteUser(ctx, id)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

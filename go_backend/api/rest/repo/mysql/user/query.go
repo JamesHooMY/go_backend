@@ -2,6 +2,7 @@ package user
 
 import (
 	"context"
+	"errors"
 
 	common "go_backend/api/rest/repo/mysql"
 	"go_backend/api/rest/service/user"
@@ -23,7 +24,7 @@ func NewUserQueryRepo(db *gorm.DB) user.IUserQueryRepo {
 func (q *userQueryRepo) GetUserByEmail(ctx context.Context, email string) (user *model.User, err error) {
 	err = q.db.WithContext(ctx).Model(&model.User{}).Where("email = ?", email).First(&user).Error
 	if err != nil {
-		if err == gorm.ErrRecordNotFound {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, ErrUserNotFound
 		}
 		return nil, err
@@ -35,7 +36,7 @@ func (q *userQueryRepo) GetUserByEmail(ctx context.Context, email string) (user 
 func (q *userQueryRepo) GetUserByID(ctx context.Context, id uint) (user *model.User, err error) {
 	err = q.db.WithContext(ctx).Model(&model.User{}).Where("id = ?", id).First(&user).Error
 	if err != nil {
-		if err == gorm.ErrRecordNotFound {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, ErrUserNotFound
 		}
 		return nil, err

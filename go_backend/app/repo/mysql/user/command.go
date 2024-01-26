@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 
-	"go_backend/api/rest/service/user"
+	"go_backend/app/service/user"
 	"go_backend/model"
 
 	"github.com/go-sql-driver/mysql"

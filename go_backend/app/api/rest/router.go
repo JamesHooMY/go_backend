@@ -3,11 +3,11 @@ package rest
 import (
 	"fmt"
 
-	userHdl "go_backend/api/rest/handler/user"
-	"go_backend/api/rest/middleware"
-	userRepo "go_backend/api/rest/repo/mysql/user"
-	userRdsRepo "go_backend/api/rest/repo/redis/user"
-	userSrv "go_backend/api/rest/service/user"
+	userHdl "go_backend/app/api/rest/v1/handler/user"
+	"go_backend/app/api/rest/v1/middleware"
+	userRepo "go_backend/app/repo/mysql/user"
+	userRdsRepo "go_backend/app/repo/redis/user"
+	userSrv "go_backend/app/service/user"
 	_ "go_backend/docs"
 
 	"github.com/gin-gonic/gin"

@@ -4,8 +4,8 @@ import (
 	"context"
 	"errors"
 
-	common "go_backend/api/rest/repo/mysql"
-	"go_backend/api/rest/service/user"
+	common "go_backend/app/repo/mysql"
+	"go_backend/app/service/user"
 	"go_backend/model"
 
 	"gorm.io/gorm"

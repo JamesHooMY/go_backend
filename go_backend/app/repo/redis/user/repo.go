@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	"go_backend/api/rest/service/user"
+	"go_backend/app/service/user"
 
 	"github.com/redis/go-redis/v9"
 )

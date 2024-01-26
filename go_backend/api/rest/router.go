@@ -29,9 +29,11 @@ func InitRouter(router *gin.Engine, db *gorm.DB, rd *redis.ClusterClient) *gin.E
 
 	v1 := router.Group(fmt.Sprintf("/api/%s", viper.GetString("server.apiVersion")))
 	user := v1.Group("/user")
+
 	user.GET("/:id", userHandler.GetUserByID())
 	user.POST("/login", userHandler.Login())
 	user.POST("/register", userHandler.Register())
+	user.POST("/userList", userHandler.GetUserList())
 
 	return router
 }

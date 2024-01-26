@@ -1,8 +1,87 @@
 definitions:
+  handler.ErrorResponse:
+    properties:
+      code:
+        type: integer
+      msg:
+        type: string
+    type: object
   user.LoginResp:
     properties:
       token:
         type: string
+      username:
+        type: string
+    type: object
+  user.UserListResp:
+    properties:
+      limit:
+        type: integer
+      page:
+        type: integer
+      total:
+        type: integer
+      userList:
+        items:
+          $ref: '#/definitions/user.UserResp'
+        type: array
+    type: object
+  user.UserResp:
+    properties:
+      age:
+        type: integer
+      createdAt:
+        type: string
+      deletedAt:
+        type: string
+      email:
+        type: string
+      id:
+        type: integer
+      mobile:
+        type: string
+      name:
+        type: string
+      updatedAt:
+        type: string
+    type: object
+  user.getUserListReq:
+    properties:
+      limit:
+        minimum: 1
+        type: integer
+      page:
+        minimum: 1
+        type: integer
+    required:
+    - limit
+    - page
+    type: object
+  user.loginReq:
+    properties:
+      email:
+        maxLength: 50
+        type: string
+      password:
+        maxLength: 20
+        minLength: 8
+        type: string
+    required:
+    - email
+    - password
+    type: object
+  user.registerReq:
+    properties:
+      email:
+        maxLength: 50
+        type: string
+      password:
+        maxLength: 20
+        minLength: 8
+        type: string
+    required:
+    - email
+    - password
     type: object
 info:
   contact: {}
@@ -10,18 +89,47 @@ info:
   title: go_backend API
   version: 0.0.1
 paths:
-  /user/login:
+  /api/v1/user/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Get user by id
+      parameters:
+      - description: id
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success
+          schema:
+            $ref: '#/definitions/user.UserResp'
+        "400":
+          description: bad request
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+        "500":
+          description: internal server error
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+      summary: Get user by id
+      tags:
+      - User
+  /api/v1/user/login:
     post:
       consumes:
       - application/json
       description: User login
       parameters:
-      - description: username
+      - description: login request
         in: body
-        name: username
+        name: loginReq
         required: true
         schema:
-          type: string
+          $ref: '#/definitions/user.loginReq'
       produces:
       - application/json
       responses:
@@ -32,12 +140,74 @@ paths:
         "400":
           description: bad request
           schema:
-            type: string
+            $ref: '#/definitions/handler.ErrorResponse'
         "500":
           description: internal server error
           schema:
-            type: string
+            $ref: '#/definitions/handler.ErrorResponse'
       summary: User login
+      tags:
+      - User
+  /api/v1/user/register:
+    post:
+      consumes:
+      - application/json
+      description: User register
+      parameters:
+      - description: register request
+        in: body
+        name: registerReq
+        required: true
+        schema:
+          $ref: '#/definitions/user.registerReq'
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: bad request
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+        "403":
+          description: forbidden
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+        "500":
+          description: internal server error
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+      summary: User register
+      tags:
+      - User
+  /api/v1/user/userList:
+    post:
+      consumes:
+      - application/json
+      description: Get user list
+      parameters:
+      - description: get user list request
+        in: body
+        name: getUserListReq
+        required: true
+        schema:
+          $ref: '#/definitions/user.getUserListReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success
+          schema:
+            $ref: '#/definitions/user.UserListResp'
+        "400":
+          description: bad request
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+        "500":
+          description: internal server error
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+      summary: Get user list
       tags:
       - User
 swagger: "2.0"

@@ -3,6 +3,7 @@ package user
 import (
 	"context"
 	"strings"
+	"time"
 
 	"go_backend/model"
 	"go_backend/util"
@@ -11,16 +12,18 @@ import (
 type IUserService interface {
 	Login(ctx context.Context, username, password string) (loginResp *LoginResp, err error)
 	Register(ctx context.Context, email, password string) (err error)
-	GetUserByID(ctx context.Context, id uint) (user *model.User, err error)
+	GetUserByID(ctx context.Context, id uint) (userResp *UserResp, err error)
+	GetUserList(ctx context.Context, page, limit int) (userListResp *UserListResp, err error)
 }
 
 type IUserQueryRepo interface {
-	GetUserByEmail(email string) (user *model.User, err error)
-	GetUserByID(id uint) (user *model.User, err error)
+	GetUserByEmail(ctx context.Context, email string) (user *model.User, err error)
+	GetUserByID(ctx context.Context, id uint) (user *model.User, err error)
+	GetUserList(ctx context.Context, page, limit int) (userList []*model.User, total int64, err error)
 }
 
 type IUserCommandRepo interface {
-	CreateUser(user *model.User) (err error)
+	CreateUser(ctx context.Context, user *model.User) (err error)
 }
 
 type userService struct {
@@ -37,7 +40,7 @@ func NewUserService(userQryRepo IUserQueryRepo, userCmdRepo IUserCommandRepo) IU
 }
 
 func (s *userService) Login(ctx context.Context, email, password string) (loginResp *LoginResp, err error) {
-	user, err := s.userQryRepo.GetUserByEmail(email)
+	user, err := s.userQryRepo.GetUserByEmail(ctx, email)
 	if err != nil {
 		return nil, err
 	}
@@ -53,6 +56,11 @@ func (s *userService) Login(ctx context.Context, email, password string) (loginR
 	}, nil
 }
 
+type LoginResp struct {
+	Username string `json:"username"`
+	Token    string `json:"token"`
+}
+
 func (s *userService) Register(ctx context.Context, email, password string) (err error) {
 	user := &model.User{
 		Name:     strings.Split(email, "@")[0],
@@ -60,7 +68,7 @@ func (s *userService) Register(ctx context.Context, email, password string) (err
 		Password: password,
 	}
 
-	err = s.userCmdRepo.CreateUser(user)
+	err = s.userCmdRepo.CreateUser(ctx, user)
 	if err != nil {
 		return err
 	}
@@ -68,11 +76,67 @@ func (s *userService) Register(ctx context.Context, email, password string) (err
 	return nil
 }
 
-func (s *userService) GetUserByID(ctx context.Context, id uint) (user *model.User, err error) {
-	return s.userQryRepo.GetUserByID(id)
+func (s *userService) GetUserByID(ctx context.Context, id uint) (userResp *UserResp, err error) {
+	user, err := s.userQryRepo.GetUserByID(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+
+	userResp = &UserResp{
+		ID:        user.ID,
+		CreatedAt: user.CreatedAt,
+		UpdatedAt: user.UpdatedAt,
+		DeletedAt: user.DeletedAt.Time,
+		Mobile:    user.Mobile,
+		Name:      user.Name,
+		Age:       user.Age,
+	}
+
+	return userResp, nil
 }
 
-type LoginResp struct {
-	Username string `json:"username"`
-	Token    string `json:"token"`
+type UserResp struct {
+	ID        uint      `json:"id"`
+	CreatedAt time.Time `json:"createdAt"`
+	UpdatedAt time.Time `json:"updatedAt"`
+	DeletedAt time.Time `json:"deletedAt"`
+	Email     string    `json:"email"`
+	Mobile    string    `json:"mobile"`
+	Name      string    `json:"name"`
+	Age       int       `json:"age"`
+}
+
+func (s *userService) GetUserList(ctx context.Context, page, limit int) (userListResp *UserListResp, err error) {
+	userList, total, err := s.userQryRepo.GetUserList(ctx, page, limit)
+	if err != nil {
+		return nil, err
+	}
+
+	userListResp = &UserListResp{
+		UserList: make([]*UserResp, 0, len(userList)),
+		Total:    total,
+		Page:     page,
+		Limit:    limit,
+	}
+
+	for _, user := range userList {
+		userListResp.UserList = append(userListResp.UserList, &UserResp{
+			ID:        user.ID,
+			CreatedAt: user.CreatedAt,
+			UpdatedAt: user.UpdatedAt,
+			DeletedAt: user.DeletedAt.Time,
+			Mobile:    user.Mobile,
+			Name:      user.Name,
+			Age:       user.Age,
+		})
+	}
+
+	return userListResp, nil
+}
+
+type UserListResp struct {
+	UserList []*UserResp `json:"userList"`
+	Total    int64       `json:"total"`
+	Page     int         `json:"page"`
+	Limit    int         `json:"limit"`
 }

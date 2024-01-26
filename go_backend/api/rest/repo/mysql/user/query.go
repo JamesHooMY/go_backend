@@ -1,6 +1,9 @@
 package user
 
 import (
+	"context"
+
+	common "go_backend/api/rest/repo/mysql"
 	"go_backend/api/rest/service/user"
 	"go_backend/model"
 
@@ -17,8 +20,8 @@ func NewUserQueryRepo(db *gorm.DB) user.IUserQueryRepo {
 	}
 }
 
-func (q *userQueryRepo) GetUserByEmail(email string) (user *model.User, err error) {
-	err = q.db.Model(&model.User{}).Where("email = ?", email).First(&user).Error
+func (q *userQueryRepo) GetUserByEmail(ctx context.Context, email string) (user *model.User, err error) {
+	err = q.db.WithContext(ctx).Model(&model.User{}).Where("email = ?", email).First(&user).Error
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return nil, ErrUserNotFound
@@ -29,8 +32,8 @@ func (q *userQueryRepo) GetUserByEmail(email string) (user *model.User, err erro
 	return user, nil
 }
 
-func (q *userQueryRepo) GetUserByID(id uint) (user *model.User, err error) {
-	err = q.db.Model(&model.User{}).Where("id = ?", id).First(&user).Error
+func (q *userQueryRepo) GetUserByID(ctx context.Context, id uint) (user *model.User, err error) {
+	err = q.db.WithContext(ctx).Model(&model.User{}).Where("id = ?", id).First(&user).Error
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return nil, ErrUserNotFound
@@ -39,4 +42,16 @@ func (q *userQueryRepo) GetUserByID(id uint) (user *model.User, err error) {
 	}
 
 	return user, nil
+}
+
+func (q *userQueryRepo) GetUserList(ctx context.Context, page, limit int) (userList []*model.User, total int64, err error) {
+	err = q.db.WithContext(ctx).Model(&model.User{}).
+		Scopes(common.Pagination(page, limit)).Find(&userList). // pagination
+		Offset(-1).Limit(-1).Count(&total).                     // get total
+		Error
+	if err != nil {
+		return nil, 0, err
+	}
+
+	return userList, total, nil
 }

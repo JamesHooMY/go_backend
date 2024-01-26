@@ -11,7 +11,10 @@ var (
 )
 
 type Response struct {
-	Code int    `json:"code,omitempty"`
-	Msg  string `json:"msg,omitempty"`
-	Data any    `json:"data,omitempty"`
+	Data any `json:"data"`
+}
+
+type ErrorResponse struct {
+	Code int    `json:"code"`
+	Msg  string `json:"msg"`
 }

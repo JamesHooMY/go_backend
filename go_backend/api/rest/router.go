@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	userHdl "go_backend/api/rest/handler/user"
+	"go_backend/api/rest/middleware"
 	userRepo "go_backend/api/rest/repo/mysql/user"
 	userRdsRepo "go_backend/api/rest/repo/redis/user"
 	userSrv "go_backend/api/rest/service/user"
@@ -26,14 +27,21 @@ func InitRouter(router *gin.Engine, db *gorm.DB, rds *redis.Client) *gin.Engine 
 	// docs.SwaggerInfo.BasePath = fmt.Sprintf("/api/%s", viper.GetString("server.apiVersion"))
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
 
-	userHandler := userHdl.NewUserHandler(userSrv.NewUserService(userRepo.NewUserQueryRepo(db), userRepo.NewUserCommandRepo(db), userRdsRepo.NewUserRedisRepo(rds)))
+	userHandler := userHdl.NewUserHandler(userSrv.NewUserService(
+		userRepo.NewUserQueryRepo(db),
+		userRepo.NewUserCommandRepo(db),
+		userRdsRepo.NewUserRedisRepo(rds),
+	))
 
 	v1 := router.Group(fmt.Sprintf("/api/%s", viper.GetString("server.apiVersion")))
-	user := v1.Group("/user")
+	v1.POST("/login", userHandler.Login())
+	v1.POST("/register", userHandler.Register())
 
+	user := v1.Group("/user").Use(middleware.Auth(
+		userRdsRepo.NewUserRedisRepo(rds),
+		userRepo.NewUserQueryRepo(db),
+	))
 	user.GET("/:id", userHandler.GetUserByID())
-	user.POST("/login", userHandler.Login())
-	user.POST("/register", userHandler.Register())
 	user.POST("/userList", userHandler.GetUserList())
 	user.PUT("/:id", userHandler.UpdateUserByID())
 	user.DELETE("/:id", userHandler.DeleteUserByID())

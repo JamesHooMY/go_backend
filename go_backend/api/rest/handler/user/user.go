@@ -5,11 +5,12 @@ import (
 	"net/http"
 	"strconv"
 
+	"go_backend/model"
+	"go_backend/util"
+
 	hdl "go_backend/api/rest/handler"
 	userRepo "go_backend/api/rest/repo/mysql/user"
 	userSrv "go_backend/api/rest/service/user"
-	"go_backend/model"
-	"go_backend/util"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -35,7 +36,7 @@ func NewUserHandler(userService userSrv.IUserService) IUserHandler {
 }
 
 // @Tags User
-// @Router /api/v1/user/login [post]
+// @Router /api/v1/login [post]
 // @Summary User login
 // @Description User login
 // @Accept json
@@ -61,7 +62,7 @@ func (h *UserHandler) Login() gin.HandlerFunc {
 		if err != nil {
 			if errors.Is(err, userSrv.ErrPasswordIncorrect) {
 				c.AbortWithStatusJSON(http.StatusUnauthorized, &hdl.ErrorResponse{
-					Code: hdl.ErrUnauthorized,
+					Code: hdl.ErrInvalidPassword,
 					Msg:  userSrv.ErrPasswordIncorrect.Error(),
 				})
 				return
@@ -94,7 +95,7 @@ type loginReq struct {
 }
 
 // @Tags User
-// @Router /api/v1/user/register [post]
+// @Router /api/v1/register [post]
 // @Summary User register
 // @Description User register
 // @Accept json
@@ -236,6 +237,7 @@ type getUserListReq struct {
 // @Param updateUserReq body updateUserReq true "update user request"
 // @Success 204
 // @Failure 400 {object} hdl.ErrorResponse "bad request"
+// @Failure 403 {object} hdl.ErrorResponse "forbidden"
 // @Failure 404 {object} hdl.ErrorResponse "not found"
 // @Failure 500 {object} hdl.ErrorResponse "internal server error"
 func (h *UserHandler) UpdateUserByID() gin.HandlerFunc {
@@ -245,6 +247,15 @@ func (h *UserHandler) UpdateUserByID() gin.HandlerFunc {
 			c.AbortWithStatusJSON(http.StatusBadRequest, &hdl.ErrorResponse{
 				Code: hdl.ErrRequestInvalid,
 				Msg:  "id must be an integer",
+			})
+			return
+		}
+
+		// make sure user can only update his/her own info
+		if userID != uint64(c.GetInt("userID")) {
+			c.AbortWithStatusJSON(http.StatusForbidden, &hdl.ErrorResponse{
+				Code: hdl.ErrForbidden,
+				Msg:  "Not allowed to update other user's info",
 			})
 			return
 		}
@@ -303,6 +314,7 @@ type updateUserReq struct {
 // @Param id path int true "id"
 // @Success 204
 // @Failure 400 {object} hdl.ErrorResponse "bad request"
+// @Failure 403 {object} hdl.ErrorResponse "forbidden"
 // @Failure 404 {object} hdl.ErrorResponse "not found"
 // @Failure 500 {object} hdl.ErrorResponse "internal server error"
 func (h *UserHandler) DeleteUserByID() gin.HandlerFunc {
@@ -312,6 +324,15 @@ func (h *UserHandler) DeleteUserByID() gin.HandlerFunc {
 			c.AbortWithStatusJSON(http.StatusBadRequest, &hdl.ErrorResponse{
 				Code: hdl.ErrRequestInvalid,
 				Msg:  "id must be an integer",
+			})
+			return
+		}
+
+		// make sure user can only delete his/her own info
+		if userID != uint64(c.GetInt("userID")) {
+			c.AbortWithStatusJSON(http.StatusForbidden, &hdl.ErrorResponse{
+				Code: hdl.ErrForbidden,
+				Msg:  "Not allowed to delete other user",
 			})
 			return
 		}

@@ -7,14 +7,14 @@ import (
 	"github.com/spf13/viper"
 )
 
-func InitRedisClient(c context.Context) (*redis.Client, error) {
+func InitRedisClient(ctx context.Context) (*redis.Client, error) {
 	rdClient := redis.NewClient(&redis.Options{
 		Addr:     viper.GetString("redis.host"),
 		Password: viper.GetString("redis.password"),
 		DB:       viper.GetInt("redis.db"),
 	})
 
-	if _, err := rdClient.Ping(c).Result(); err != nil {
+	if _, err := rdClient.Ping(ctx).Result(); err != nil {
 		return nil, err
 	}
 

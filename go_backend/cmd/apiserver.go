@@ -53,7 +53,7 @@ func RunApiserver(cmd *cobra.Command, _ []string) {
 	}
 
 	// init mysql
-	db, err := mysql.InitMySQL()
+	db, err := mysql.InitMySQL(cmd.Context())
 	if err != nil {
 		errMsg := fmt.Sprintf("Init MySQL error: %s\n", err)
 		global.Logger.Error(errMsg)
@@ -67,28 +67,6 @@ func RunApiserver(cmd *cobra.Command, _ []string) {
 		global.Logger.Error(errMsg)
 		panic(errMsg)
 	}
-	// test redis
-	// if err := rdClient.Set(cmd.Context(), "test", 1, 30*24*time.Hour).Err(); err != nil {
-	// 	errMsg := fmt.Sprintf("Redis set error: %s\n", err)
-	// 	global.Logger.Error(errMsg)
-	// 	panic(errMsg)
-	// }
-
-	// test jwt
-	// token, err := util.GenerateJwtToken(1, "james")
-	// if err != nil {
-	// 	errMsg := fmt.Sprintf("Generate token error: %s\n", err)
-	// 	global.Logger.Error(errMsg)
-	// 	panic(errMsg)
-	// }
-	// fmt.Println("token:", token)
-	// claims, err := util.ParseJwtToken(token)
-	// if err != nil {
-	// 	errMsg := fmt.Sprintf("Parse token error: %s\n", err)
-	// 	global.Logger.Error(errMsg)
-	// 	panic(errMsg)
-	// }
-	// fmt.Printf("%+v\n", claims)
 
 	// init router
 	r := router.InitRouter(gin.Default(), db, rdClient)

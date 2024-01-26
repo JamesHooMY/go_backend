@@ -1,5 +1,5 @@
 definitions:
-  handler.ErrorResponse:
+  rest.ErrorResponse:
     properties:
       code:
         type: integer
@@ -109,6 +109,76 @@ info:
   title: go_backend API
   version: 0.0.1
 paths:
+  /api/v1/login:
+    post:
+      consumes:
+      - application/json
+      description: User login
+      parameters:
+      - description: login request
+        in: body
+        name: loginReq
+        required: true
+        schema:
+          $ref: '#/definitions/user.loginReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success
+          schema:
+            $ref: '#/definitions/user.LoginResp'
+        "400":
+          description: bad request
+          schema:
+            $ref: '#/definitions/rest.ErrorResponse'
+        "401":
+          description: unauthorized
+          schema:
+            $ref: '#/definitions/rest.ErrorResponse'
+        "404":
+          description: not found
+          schema:
+            $ref: '#/definitions/rest.ErrorResponse'
+        "500":
+          description: internal server error
+          schema:
+            $ref: '#/definitions/rest.ErrorResponse'
+      summary: User login
+      tags:
+      - User
+  /api/v1/register:
+    post:
+      consumes:
+      - application/json
+      description: User register
+      parameters:
+      - description: register request
+        in: body
+        name: registerReq
+        required: true
+        schema:
+          $ref: '#/definitions/user.registerReq'
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: bad request
+          schema:
+            $ref: '#/definitions/rest.ErrorResponse'
+        "403":
+          description: forbidden
+          schema:
+            $ref: '#/definitions/rest.ErrorResponse'
+        "500":
+          description: internal server error
+          schema:
+            $ref: '#/definitions/rest.ErrorResponse'
+      summary: User register
+      tags:
+      - User
   /api/v1/user/{id}:
     delete:
       consumes:
@@ -128,15 +198,19 @@ paths:
         "400":
           description: bad request
           schema:
-            $ref: '#/definitions/handler.ErrorResponse'
+            $ref: '#/definitions/rest.ErrorResponse'
+        "403":
+          description: forbidden
+          schema:
+            $ref: '#/definitions/rest.ErrorResponse'
         "404":
           description: not found
           schema:
-            $ref: '#/definitions/handler.ErrorResponse'
+            $ref: '#/definitions/rest.ErrorResponse'
         "500":
           description: internal server error
           schema:
-            $ref: '#/definitions/handler.ErrorResponse'
+            $ref: '#/definitions/rest.ErrorResponse'
       summary: Delete user by id
       tags:
       - User
@@ -160,15 +234,15 @@ paths:
         "400":
           description: bad request
           schema:
-            $ref: '#/definitions/handler.ErrorResponse'
+            $ref: '#/definitions/rest.ErrorResponse'
         "404":
           description: not found
           schema:
-            $ref: '#/definitions/handler.ErrorResponse'
+            $ref: '#/definitions/rest.ErrorResponse'
         "500":
           description: internal server error
           schema:
-            $ref: '#/definitions/handler.ErrorResponse'
+            $ref: '#/definitions/rest.ErrorResponse'
       summary: Get user by id
       tags:
       - User
@@ -196,82 +270,20 @@ paths:
         "400":
           description: bad request
           schema:
-            $ref: '#/definitions/handler.ErrorResponse'
-        "404":
-          description: not found
-          schema:
-            $ref: '#/definitions/handler.ErrorResponse'
-        "500":
-          description: internal server error
-          schema:
-            $ref: '#/definitions/handler.ErrorResponse'
-      summary: Update user by id
-      tags:
-      - User
-  /api/v1/user/login:
-    post:
-      consumes:
-      - application/json
-      description: User login
-      parameters:
-      - description: login request
-        in: body
-        name: loginReq
-        required: true
-        schema:
-          $ref: '#/definitions/user.loginReq'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: success
-          schema:
-            $ref: '#/definitions/user.LoginResp'
-        "400":
-          description: bad request
-          schema:
-            $ref: '#/definitions/handler.ErrorResponse'
-        "404":
-          description: not found
-          schema:
-            $ref: '#/definitions/handler.ErrorResponse'
-        "500":
-          description: internal server error
-          schema:
-            $ref: '#/definitions/handler.ErrorResponse'
-      summary: User login
-      tags:
-      - User
-  /api/v1/user/register:
-    post:
-      consumes:
-      - application/json
-      description: User register
-      parameters:
-      - description: register request
-        in: body
-        name: registerReq
-        required: true
-        schema:
-          $ref: '#/definitions/user.registerReq'
-      produces:
-      - application/json
-      responses:
-        "204":
-          description: No Content
-        "400":
-          description: bad request
-          schema:
-            $ref: '#/definitions/handler.ErrorResponse'
+            $ref: '#/definitions/rest.ErrorResponse'
         "403":
           description: forbidden
           schema:
-            $ref: '#/definitions/handler.ErrorResponse'
+            $ref: '#/definitions/rest.ErrorResponse'
+        "404":
+          description: not found
+          schema:
+            $ref: '#/definitions/rest.ErrorResponse'
         "500":
           description: internal server error
           schema:
-            $ref: '#/definitions/handler.ErrorResponse'
-      summary: User register
+            $ref: '#/definitions/rest.ErrorResponse'
+      summary: Update user by id
       tags:
       - User
   /api/v1/user/userList:
@@ -296,11 +308,11 @@ paths:
         "400":
           description: bad request
           schema:
-            $ref: '#/definitions/handler.ErrorResponse'
+            $ref: '#/definitions/rest.ErrorResponse'
         "500":
           description: internal server error
           schema:
-            $ref: '#/definitions/handler.ErrorResponse'
+            $ref: '#/definitions/rest.ErrorResponse'
       summary: Get user list
       tags:
       - User

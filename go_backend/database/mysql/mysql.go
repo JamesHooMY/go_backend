@@ -1,6 +1,7 @@
 package mysql
 
 import (
+	"context"
 	"fmt"
 	"time"
 
@@ -13,7 +14,7 @@ import (
 	"gorm.io/gorm/schema"
 )
 
-func InitMySQL() (*gorm.DB, error) {
+func InitMySQL(ctx context.Context) (*gorm.DB, error) {
 	dsn := fmt.Sprintf("%s:%s@tcp(%s)/%s?charset=utf8mb4&parseTime=True&loc=Local",
 		viper.GetString("mysql.username"),
 		viper.GetString("mysql.password"),
@@ -48,7 +49,7 @@ func InitMySQL() (*gorm.DB, error) {
 	sqlDB.SetMaxOpenConns(viper.GetInt("mysql.maxOpenConns"))
 	sqlDB.SetConnMaxLifetime(time.Duration(viper.GetInt("mysql.maxLifetime")) * time.Hour)
 
-	if err := db.AutoMigrate(&model.User{}); err != nil {
+	if err := db.WithContext(ctx).AutoMigrate(&model.User{}); err != nil {
 		return nil, err
 	}
 

@@ -1,11 +1,14 @@
-package handler
+package rest
 
-var (
-	ErrRequestInvalid = 40001
-	ErrUnauthorized   = 40101
-	ErrForbidden      = 40301
-	ErrNotFound       = 40401
-	ErrInternalServer = 50001
+const (
+	ErrRequestInvalid    = 40001
+	ErrInvalidPassword   = 40101
+	ErrTokenRequired     = 40102
+	ErrInvalidToken      = 40103
+	ErrUnauthorizedToken = 40104
+	ErrForbidden         = 40301
+	ErrNotFound          = 40401
+	ErrInternalServer    = 50001
 
 	ErrInternalServerMsg = "internal server error"
 )

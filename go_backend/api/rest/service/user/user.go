@@ -37,6 +37,7 @@ type IUserCommandRepo interface {
 
 type IUserRedisRepo interface {
 	SetLoginToken(ctx context.Context, userID uint, token string) (err error)
+	GetLoginToken(ctx context.Context, userID uint) (tokenUserID string, err error)
 }
 
 type userService struct {

@@ -66,29 +66,10 @@ services:
         # volumes:
         #     - ./mysql-slave-data:/var/lib/mysql
 
-    redis-1:
-        image: redis:latest
-        command: ['redis-server', '--port', '7000', '--cluster-enabled', 'yes', '--cluster-node-timeout', '5000', '--appendonly', 'yes']
+    redis:
+        image: 'redis:latest'
         ports:
-            - '7000:7000'
-        networks:
-            - mynetwork
-
-    redis-2:
-        image: redis:latest
-        command: ['redis-server', '--port', '7001', '--cluster-enabled', 'yes', '--cluster-node-timeout', '5000', '--appendonly', 'yes']
-        ports:
-            - '7001:7001'
-        networks:
-            - mynetwork
-
-    redis-3:
-        image: redis:latest
-        command: ['redis-server', '--port', '7002', '--cluster-enabled', 'yes', '--cluster-node-timeout', '5000', '--appendonly', 'yes']
-        ports:
-            - '7002:7002'
-        networks:
-            - mynetwork
+            - '6379:6379'
 
 # volumes:
 #     mysql-master-data:

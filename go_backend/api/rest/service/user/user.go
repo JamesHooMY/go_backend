@@ -2,12 +2,17 @@ package user
 
 import (
 	"context"
+	"errors"
 	"strings"
 	"time"
 
 	"go_backend/model"
 	"go_backend/util"
+
+	"golang.org/x/crypto/bcrypt"
 )
+
+var ErrPasswordIncorrect = errors.New("password incorrect")
 
 type IUserService interface {
 	Login(ctx context.Context, name, password string) (loginResp *LoginResp, err error)
@@ -30,16 +35,22 @@ type IUserCommandRepo interface {
 	DeleteUser(ctx context.Context, id uint) (err error)
 }
 
+type IUserRedisRepo interface {
+	SetLoginToken(ctx context.Context, userID uint, token string) (err error)
+}
+
 type userService struct {
 	userQryRepo IUserQueryRepo
 	userCmdRepo IUserCommandRepo
+	userRdsRepo IUserRedisRepo
 }
 
 // add database repo here
-func NewUserService(userQryRepo IUserQueryRepo, userCmdRepo IUserCommandRepo) IUserService {
+func NewUserService(userQryRepo IUserQueryRepo, userCmdRepo IUserCommandRepo, userRdsRepo IUserRedisRepo) IUserService {
 	return &userService{
 		userQryRepo: userQryRepo,
 		userCmdRepo: userCmdRepo,
+		userRdsRepo: userRdsRepo,
 	}
 }
 
@@ -49,8 +60,16 @@ func (s *userService) Login(ctx context.Context, email, password string) (loginR
 		return nil, err
 	}
 
+	if err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password)); err != nil {
+		return nil, ErrPasswordIncorrect
+	}
+
 	token, err := util.GenerateJwtToken(user.ID, user.Name)
 	if err != nil {
+		return nil, err
+	}
+
+	if err := s.userRdsRepo.SetLoginToken(ctx, user.ID, token); err != nil {
 		return nil, err
 	}
 

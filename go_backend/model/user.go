@@ -1,6 +1,10 @@
 package model
 
-import "gorm.io/gorm"
+import (
+	"go_backend/util"
+
+	"gorm.io/gorm"
+)
 
 type User struct {
 	gorm.Model
@@ -9,4 +13,19 @@ type User struct {
 	Name     string `gorm:"type:varchar(20);not null" json:"name"`
 	Age      int    `gorm:"type:int(3);check:(age >= 0) AND (age <= 150)" json:"age"`
 	Password string `gorm:"type:varchar(60);not null" json:"-"`
+}
+
+func (u *User) Encrypt() error {
+	encryptedPassword, err := util.Encrypt(u.Password)
+	if err != nil {
+		return err
+	}
+
+	u.Password = encryptedPassword
+
+	return nil
+}
+
+func (u *User) BeforeCreate(tx *gorm.DB) error {
+	return u.Encrypt()
 }

@@ -5,6 +5,7 @@ import (
 
 	userHdl "go_backend/api/rest/handler/user"
 	userRepo "go_backend/api/rest/repo/mysql/user"
+	userRdsRepo "go_backend/api/rest/repo/redis/user"
 	userSrv "go_backend/api/rest/service/user"
 	_ "go_backend/docs"
 
@@ -16,7 +17,7 @@ import (
 	"gorm.io/gorm"
 )
 
-func InitRouter(router *gin.Engine, db *gorm.DB, rd *redis.ClusterClient) *gin.Engine {
+func InitRouter(router *gin.Engine, db *gorm.DB, rds *redis.Client) *gin.Engine {
 	// middleware
 	// * if need cors then uncomment this line
 	// router.Use(middleware.Cors())
@@ -25,7 +26,7 @@ func InitRouter(router *gin.Engine, db *gorm.DB, rd *redis.ClusterClient) *gin.E
 	// docs.SwaggerInfo.BasePath = fmt.Sprintf("/api/%s", viper.GetString("server.apiVersion"))
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
 
-	userHandler := userHdl.NewUserHandler(userSrv.NewUserService(userRepo.NewUserQueryRepo(db), userRepo.NewUserCommandRepo(db)))
+	userHandler := userHdl.NewUserHandler(userSrv.NewUserService(userRepo.NewUserQueryRepo(db), userRepo.NewUserCommandRepo(db), userRdsRepo.NewUserRedisRepo(rds)))
 
 	v1 := router.Group(fmt.Sprintf("/api/%s", viper.GetString("server.apiVersion")))
 	user := v1.Group("/user")

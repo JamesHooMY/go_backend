@@ -7,14 +7,14 @@ import (
 	"github.com/spf13/viper"
 )
 
-func InitRedisClient(c context.Context) (*redis.ClusterClient, error) {
-	rdClient := redis.NewClusterClient(&redis.ClusterOptions{
-		Addrs:    []string{viper.GetString("redis.node1"), viper.GetString("redis.node2"), viper.GetString("redis.node3")},
+func InitRedisClient(c context.Context) (*redis.Client, error) {
+	rdClient := redis.NewClient(&redis.Options{
+		Addr:     viper.GetString("redis.host"),
 		Password: viper.GetString("redis.password"),
+		DB:       viper.GetInt("redis.db"),
 	})
 
-	_, err := rdClient.Ping(context.Background()).Result()
-	if err != nil {
+	if _, err := rdClient.Ping(c).Result(); err != nil {
 		return nil, err
 	}
 

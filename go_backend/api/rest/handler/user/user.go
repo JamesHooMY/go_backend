@@ -43,6 +43,7 @@ func NewUserHandler(userService userSrv.IUserService) IUserHandler {
 // @Param loginReq body loginReq true "login request"
 // @Success 200 {object} LoginResp "success"
 // @Failure 400 {object} hdl.ErrorResponse "bad request"
+// @Failure 401 {object} hdl.ErrorResponse "unauthorized"
 // @Failure 404 {object} hdl.ErrorResponse "not found"
 // @Failure 500 {object} hdl.ErrorResponse "internal server error"
 func (h *UserHandler) Login() gin.HandlerFunc {
@@ -58,6 +59,14 @@ func (h *UserHandler) Login() gin.HandlerFunc {
 
 		loginResp, err := h.UserService.Login(c.Request.Context(), req.Email, req.Password)
 		if err != nil {
+			if errors.Is(err, userSrv.ErrPasswordIncorrect) {
+				c.AbortWithStatusJSON(http.StatusUnauthorized, &hdl.ErrorResponse{
+					Code: hdl.ErrUnauthorized,
+					Msg:  userSrv.ErrPasswordIncorrect.Error(),
+				})
+				return
+			}
+
 			if errors.Is(err, userRepo.ErrUserNotFound) {
 				c.AbortWithStatusJSON(http.StatusNotFound, &hdl.ErrorResponse{
 					Code: hdl.ErrNotFound,
@@ -65,6 +74,7 @@ func (h *UserHandler) Login() gin.HandlerFunc {
 				})
 				return
 			}
+
 			c.AbortWithStatusJSON(http.StatusInternalServerError, &hdl.ErrorResponse{
 				Code: hdl.ErrInternalServer,
 				Msg:  hdl.ErrInternalServerMsg,

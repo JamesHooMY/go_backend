@@ -8,6 +8,8 @@ import (
 	"github.com/spf13/viper"
 )
 
+var jwtTokenDuration = 1 * time.Hour
+
 type Claims struct {
 	ID    uint   `json:"id"`
 	Name  string `json:"name"`
@@ -21,7 +23,7 @@ func GenerateJwtToken(ID uint, name string) (token string, err error) {
 		ID:   ID,
 		Name: name,
 		RegisteredClaims: jwt.RegisteredClaims{
-			ExpiresAt: jwt.NewNumericDate(timeNow.Add(30 * time.Minute)),
+			ExpiresAt: jwt.NewNumericDate(timeNow.Add(jwtTokenDuration)),
 			IssuedAt:  jwt.NewNumericDate(timeNow),
 		},
 	}

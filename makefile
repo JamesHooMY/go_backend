@@ -18,3 +18,6 @@ swagger:
 
 docker:
 	docker-compose -f ./build/docker-compose.yml up -d
+
+gql:
+	go run github.com/99designs/gqlgen generate --config=./config/gqlgen.yml

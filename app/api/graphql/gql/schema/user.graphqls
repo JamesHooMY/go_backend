@@ -1,0 +1,30 @@
+# Types
+type User {
+    id: ID # mysql id
+    email: String!
+    password: String
+    mobile: String
+    name: String!
+    age: Int
+    createdAt: String
+    updatedAt: String
+    deletedAt: String
+}
+
+# Input Types
+input UserInput {
+    email: String!
+    password: String!
+}
+
+# Define mutations here
+type Mutation {
+    createUser(input: UserInput!): User!
+    updateUser(input: UserInput!): User!
+    deleteUser(id: ID!): Boolean!
+}
+
+# Define queries here
+type Query {
+    users(id: ID): [User]
+}

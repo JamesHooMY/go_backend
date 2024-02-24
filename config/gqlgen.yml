@@ -1,0 +1,18 @@
+
+schema:
+    - app/api/graphql/gql/schema/*.graphqls
+# Let gqlgen know where to put the generated server
+exec:
+    filename: app/api/graphql/gql/generated/generated.go
+    package: generated
+# Let gqlgen know where to put the generated models (if any)
+model:
+    filename: app/api/graphql/gql/model/models_gen.go
+    package: model
+# Let gqlgen know where to put the generated resolvers
+resolver:
+    layout: follow-schema
+    dir: app/api/graphql/gql
+    package: gql
+
+autobind: []

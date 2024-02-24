@@ -3,6 +3,8 @@ package rest
 import (
 	"fmt"
 
+	"go_backend/app/api/graphql/gql"
+	"go_backend/app/api/graphql/gql/generated"
 	userHdl "go_backend/app/api/rest/v1/handler/user"
 	"go_backend/app/api/rest/v1/middleware"
 	userRepo "go_backend/app/repo/mysql/user"
@@ -10,6 +12,14 @@ import (
 	userSrv "go_backend/app/service/user"
 	_ "go_backend/docs"
 
+	// _ "github.com/99designs/gqlgen"
+	_ "github.com/99designs/gqlgen/graphql/introspection"
+	"github.com/99designs/gqlgen/graphql/playground"
+
+	// "github.com/99designs/gqlgen/handler"
+	gqlHdl "go_backend/app/api/graphql/handler"
+
+	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/gin-gonic/gin"
 	"github.com/redis/go-redis/v9"
 	"github.com/spf13/viper"
@@ -45,6 +55,25 @@ func InitRouter(router *gin.Engine, db *gorm.DB, rds *redis.Client) *gin.Engine 
 	user.POST("/userList", userHandler.GetUserList())
 	user.PUT("/:id", userHandler.UpdateUserByID())
 	user.DELETE("/:id", userHandler.DeleteUserByID())
+
+	// graphql playground
+	if viper.GetBool("server.gqlPlayground") {
+		router.GET(viper.GetString("server.gqlPlaygroundPath"), func(c *gin.Context) {
+			playground.Handler("GraphQL playground", viper.GetString("server.gqlPath")).ServeHTTP(c.Writer, c.Request)
+		})
+	}
+
+	// graphql
+	gqlHandler := gqlHdl.NewGqlHandler(handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{
+		Resolvers: &gql.Resolver{
+			UserService: userSrv.NewUserService(
+				userRepo.NewUserQueryRepo(db),
+				userRepo.NewUserCommandRepo(db),
+				userRdsRepo.NewUserRedisRepo(rds),
+			),
+		},
+	})))
+	router.POST(viper.GetString("server.gqlPath"), gqlHandler.GqlHdl())
 
 	return router
 }

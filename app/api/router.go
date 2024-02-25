@@ -17,7 +17,7 @@ import (
 	"github.com/99designs/gqlgen/graphql/playground"
 
 	// "github.com/99designs/gqlgen/handler"
-	gqlHdl "go_backend/app/api/graphql/handler"
+	gqlHdl "go_backend/app/api/graphql"
 
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/gin-gonic/gin"
@@ -74,6 +74,13 @@ func InitRouter(router *gin.Engine, db *gorm.DB, rds *redis.Client) *gin.Engine 
 		},
 	})))
 	router.POST(viper.GetString("server.gqlPath"), gqlHandler.GqlHdl())
+
+	// grpc client
+	// grpcClt := grpcClient.NewGrpcClient()
+	// grpc := router.Group("/grpc")
+	// grpc.POST(viper.GetString("server.grpcPath"), func(c *gin.Context) {
+	// 	grpcClt.UserSrvClient.CreateUser(c)
+	// })
 
 	return router
 }

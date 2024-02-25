@@ -1,0 +1,41 @@
+syntax = "proto3";
+package user;
+option go_package = "go_backend/app/api/grpc/user";
+
+// 使用者資訊
+message User {
+    string id = 1;
+    string name = 2;
+    string email = 3;
+    string password = 4;
+    string created_at = 5;
+    string updated_at = 6;
+    string deleted_at = 7;
+}
+
+service UserService {
+    rpc CreateUser(CreateUserRequest) returns (CreateUserResponse);
+    rpc GetUsers(GetUsersRequest) returns (GetUsersResponse);
+}
+
+message CreateUserRequest {
+    string email = 1;
+    string password = 2;
+}
+
+message CreateUserResponse {
+    User user = 1;
+}
+
+
+message GetUsersRequest {
+    string id = 1;
+}
+
+message GetUsersResponse {
+    UserList users = 1;
+}
+
+message UserList {
+    repeated User users = 1;
+}

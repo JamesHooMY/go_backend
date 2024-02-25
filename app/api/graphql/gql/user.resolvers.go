@@ -7,6 +7,7 @@ package gql
 import (
 	"context"
 	"fmt"
+
 	"go_backend/app/api/graphql/gql/generated"
 	"go_backend/app/api/graphql/gql/model"
 )
@@ -20,6 +21,7 @@ func (r *mutationResolver) CreateUser(ctx context.Context, input model.UserInput
 		Email:    input.Email,
 		Password: &input.Password,
 	}
+	// r.Resolver.UserService.Register(ctx, input.Email, input.Password)
 
 	return record, nil
 }
@@ -54,5 +56,7 @@ func (r *Resolver) Mutation() generated.MutationResolver { return &mutationResol
 // Query returns generated.QueryResolver implementation.
 func (r *Resolver) Query() generated.QueryResolver { return &queryResolver{r} }
 
-type mutationResolver struct{ *Resolver }
-type queryResolver struct{ *Resolver }
+type (
+	mutationResolver struct{ *Resolver }
+	queryResolver    struct{ *Resolver }
+)

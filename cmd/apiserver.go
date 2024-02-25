@@ -6,6 +6,7 @@ package cmd
 import (
 	"context"
 	"fmt"
+	"net"
 	"net/http"
 	"os"
 	"os/signal"
@@ -16,11 +17,13 @@ import (
 	"go_backend/database/mysql"
 	"go_backend/database/redis"
 	"go_backend/global"
+	grpcServer "go_backend/internal/grpc"
 	logger "go_backend/log"
 
 	"github.com/gin-gonic/gin"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"google.golang.org/grpc"
 )
 
 // rootCmd represents the base command when called without any subcommands
@@ -77,9 +80,22 @@ func RunApiserver(cmd *cobra.Command, _ []string) {
 
 	// start server in goroutine
 	go func() {
-		global.Logger.Infof("Start server %s\n", server.Addr)
+		global.Logger.Infof("Start gin server %s\n", server.Addr)
 		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 			global.Logger.Fatalf("Listen error: %s\n", err)
+		}
+	}()
+
+	// start grpc server
+	grpcSvr := grpcServer.InitGrpcServer(grpc.NewServer(), db, rdClient)
+	go func() {
+		global.Logger.Infof("Start grpc server :%s\n", viper.GetString("server.grpcPort"))
+		grpcListener, err := net.Listen("tcp", fmt.Sprintf(":%d", viper.GetInt("server.grpcPort")))
+		if err != nil {
+			global.Logger.Fatalf("grpc listener error: %s\n", err)
+		}
+		if err := grpcSvr.Serve(grpcListener); err != nil {
+			global.Logger.Fatalf("grpc server error: %s\n", err)
 		}
 	}()
 

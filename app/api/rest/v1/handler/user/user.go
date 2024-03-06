@@ -83,7 +83,7 @@ func (h *UserHandler) Login() gin.HandlerFunc {
 			return
 		}
 
-		c.AbortWithStatusJSON(http.StatusOK, &v1.Response{
+		c.JSON(http.StatusOK, &v1.Response{
 			Data: loginResp,
 		})
 	}
@@ -133,7 +133,7 @@ func (h *UserHandler) Register() gin.HandlerFunc {
 			return
 		}
 
-		c.AbortWithStatus(http.StatusNoContent)
+		c.JSON(http.StatusNoContent, nil)
 	}
 }
 
@@ -180,7 +180,7 @@ func (h *UserHandler) GetUserByID() gin.HandlerFunc {
 			return
 		}
 
-		c.AbortWithStatusJSON(http.StatusOK, &v1.Response{
+		c.JSON(http.StatusOK, &v1.Response{
 			Data: user,
 		})
 	}
@@ -216,7 +216,7 @@ func (h *UserHandler) GetUserList() gin.HandlerFunc {
 			return
 		}
 
-		c.AbortWithStatusJSON(http.StatusOK, &v1.Response{
+		c.JSON(http.StatusOK, &v1.Response{
 			Data: userListResp,
 		})
 	}
@@ -293,7 +293,7 @@ func (h *UserHandler) UpdateUserByID() gin.HandlerFunc {
 			return
 		}
 
-		c.AbortWithStatus(http.StatusNoContent)
+		c.JSON(http.StatusNoContent, nil)
 	}
 }
 
@@ -353,6 +353,6 @@ func (h *UserHandler) DeleteUserByID() gin.HandlerFunc {
 			return
 		}
 
-		c.AbortWithStatus(http.StatusNoContent)
+		c.JSON(http.StatusNoContent, nil)
 	}
 }

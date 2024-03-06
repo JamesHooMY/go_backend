@@ -46,7 +46,6 @@ go_backend/
 │  │  │  ├─ user/
 │  ├─ service/
 │  │  ├─ user/
-├─ new_file
 ├─ build/
 │  ├─ docker-compose.yml
 ├─ cmd/

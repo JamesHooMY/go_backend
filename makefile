@@ -16,8 +16,11 @@ cover:
 swagger:
 	swag init
 
-docker:
+docker_up:
 	docker-compose -f ./build/docker-compose.yml up -d
+
+docker_down:
+	docker-compose -f ./build/docker-compose.yml down
 
 gql:
 	go run github.com/99designs/gqlgen generate --config=./config/gqlgen.yml

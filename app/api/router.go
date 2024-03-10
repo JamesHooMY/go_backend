@@ -15,6 +15,7 @@ import (
 	// _ "github.com/99designs/gqlgen"
 	_ "github.com/99designs/gqlgen/graphql/introspection"
 	"github.com/99designs/gqlgen/graphql/playground"
+	"github.com/gin-contrib/pprof"
 
 	// "github.com/99designs/gqlgen/handler"
 	gqlHdl "go_backend/app/api/graphql"
@@ -29,6 +30,9 @@ import (
 )
 
 func InitRouter(router *gin.Engine, db *gorm.DB, rds *redis.Client) *gin.Engine {
+	// pprof
+	pprof.Register(router)
+
 	// middleware
 	// * if need cors then uncomment this line
 	// router.Use(middleware.Cors())

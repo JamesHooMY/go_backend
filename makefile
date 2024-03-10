@@ -34,3 +34,21 @@ grpc_server:
 	protoc -I internal/grpc internal/grpc/*/*.proto \
     --go_out=internal/grpc --go_opt=paths=source_relative \
     --go-grpc_out=internal/grpc --go-grpc_opt=paths=source_relative
+
+pprof_block:
+	go tool pprof -http=:6060 http://localhost:8080/debug/pprof/block
+
+pprof_goroutine:
+	go tool pprof -http=:6060 http://localhost:8080/debug/pprof/goroutine
+
+pprof_threadcreate:
+	go tool pprof -http=:6060 http://localhost:8080/debug/pprof/threadcreate
+
+pprof_trace:
+	go tool pprof -http=:6060 http://localhost:8080/debug/pprof/trace
+
+pprof_mem:
+	go tool pprof -http=:6060 http://localhost:8080/debug/pprof/heap
+
+pprof_cpu:
+	go tool pprof -http=:6060 http://localhost:8080/debug/pprof/profile
